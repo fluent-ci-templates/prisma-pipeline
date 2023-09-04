@@ -11,9 +11,13 @@ const DATABASE_URL = Deno.env.get("DATABASE_URL");
 const exclude = [".git", "node_modules", ".fluentci", ".env"];
 
 export const validate = async (client: Client, src = ".") => {
+  if (!DATABASE_URL) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
   const context = client.host().directory(src);
   const ctr = client
-    .pipeline(Job.push)
+    .pipeline(Job.validate)
     .container()
     .from("ghcr.io/fluent-ci-templates/bun:latest")
     .withMountedCache(
@@ -22,6 +26,7 @@ export const validate = async (client: Client, src = ".") => {
     )
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
+    .withEnvVariable("DATABASE_URL", DATABASE_URL)
     .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
     .withExec([
       "sh",
@@ -48,7 +53,7 @@ export const deploy = async (client: Client, src = ".") => {
 
   const context = client.host().directory(src);
   const ctr = client
-    .pipeline(Job.push)
+    .pipeline(Job.deploy)
     .container()
     .from("ghcr.io/fluent-ci-templates/bun:latest")
     .withServiceBinding("mysql", mysql)

@@ -1,7 +1,7 @@
 import Client, { connect } from "@dagger.io/dagger";
 import * as jobs from "./jobs.ts";
 
-const { validate, deploy, runnableJobs } = jobs;
+const { deploy, runnableJobs } = jobs;
 
 export default function pipeline(src = ".", args: string[] = []) {
   connect(async (client: Client) => {
@@ -9,8 +9,6 @@ export default function pipeline(src = ".", args: string[] = []) {
       await runSpecificJobs(client, args as jobs.Job[]);
       return;
     }
-
-    await validate(client, src);
     await deploy(client, src);
   });
 }

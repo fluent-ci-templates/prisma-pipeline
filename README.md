@@ -50,12 +50,31 @@ You can also use this pipeline programmatically:
 import { Client, connect } from "https://esm.sh/@dagger.io/dagger@0.8.1";
 import { Dagger } from "https://pkg.fluentci.io/prisma_pipeline/mod.ts";
 
-const { deploy, validate } = Dagger;
+const { deploy } = Dagger;
 
 function pipeline(src = ".") {
   connect(async (client: Client) => {
-    await validate(client, src);
+    // Deploy all migrations
     await deploy(client, src);
+  });
+}
+
+pipeline();
+```
+
+Or:
+
+```ts
+import { Client, connect } from "https://esm.sh/@dagger.io/dagger@0.8.1";
+import { Dagger } from "https://pkg.fluentci.io/prisma_pipeline/mod.ts";
+
+const { validate, push } = Dagger;
+
+function pipeline(src = ".") {
+  connect(async (client: Client) => {
+    // validate prisma schema and apply schema changes
+    await validate(client, src);
+    await push(client, src);
   });
 }
 
