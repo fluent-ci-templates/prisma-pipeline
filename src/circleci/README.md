@@ -36,6 +36,8 @@ jobs:
           command: dagger run fluentci prisma_pipeline
     machine:
       image: ubuntu-2004:2023.07.1
+    environment:
+      DATABASE_URL: ${{prisma.DATABASE_URL}}
 workflows:
   dagger:
     jobs:

@@ -35,7 +35,8 @@ steps:
     displayName: Setup Dagger
   - script: fluentci run prisma_pipeline
     displayName: Run Dagger Pipelines
-
+variables:
+  DATABASE_URL: $(DATABASE_URL)
 ```
 
 Feel free to edit the template generator at `.fluentci/src/azure/config.ts` to your needs.
