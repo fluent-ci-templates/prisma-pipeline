@@ -65,7 +65,7 @@ pipeline();
 Or:
 
 ```ts
-import { Client, connect } from "https://esm.sh/@dagger.io/dagger@0.8.1";
+import Client, { connect } from "https://sdk.fluentci.io/v0.1.4/mod.ts";
 import { Dagger } from "https://pkg.fluentci.io/prisma_pipeline/mod.ts";
 
 const { validate, push } = Dagger;
