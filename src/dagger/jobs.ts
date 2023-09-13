@@ -8,7 +8,7 @@ export enum Job {
 
 const DATABASE_URL = Deno.env.get("DATABASE_URL");
 
-const exclude = [".git", "node_modules", ".fluentci", ".env"];
+export const exclude = [".git", "node_modules", ".fluentci", ".env"];
 
 export const validate = async (client: Client, src = ".") => {
   if (!DATABASE_URL) {

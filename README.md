@@ -48,9 +48,7 @@ You can also use this pipeline programmatically:
 
 ```ts
 import Client, { connect } from "https://sdk.fluentci.io/v0.1.4/mod.ts";
-import { Dagger } from "https://pkg.fluentci.io/prisma_pipeline/mod.ts";
-
-const { deploy } = Dagger;
+import { deploy } from "https://pkg.fluentci.io/prisma_pipeline@v0.3.0/mod.ts";
 
 function pipeline(src = ".") {
   connect(async (client: Client) => {
@@ -66,9 +64,7 @@ Or:
 
 ```ts
 import Client, { connect } from "https://sdk.fluentci.io/v0.1.4/mod.ts";
-import { Dagger } from "https://pkg.fluentci.io/prisma_pipeline/mod.ts";
-
-const { validate, push } = Dagger;
+import { validate, push } from "https://pkg.fluentci.io/prisma_pipeline@v0.3.0/mod.ts";
 
 function pipeline(src = ".") {
   connect(async (client: Client) => {
