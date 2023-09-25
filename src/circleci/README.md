@@ -33,7 +33,7 @@ jobs:
           dagger version
       - run:
           name: Run Dagger Pipelines
-          command: dagger run fluentci prisma_pipeline
+          command: fluentci run prisma_pipeline
     machine:
       image: ubuntu-2004:2023.07.1
     environment:
