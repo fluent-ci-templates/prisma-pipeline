@@ -1,0 +1,5 @@
+{
+  prisma {
+    push(src: ".", databaseUrl: "mysql://root:pass@mysql:3306/example")
+  }
+}
