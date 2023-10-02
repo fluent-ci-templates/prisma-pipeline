@@ -1,4 +1,4 @@
-import Client from "../../deps.ts";
+import { client } from "./dagger.ts";
 
 export enum Job {
   validate = "validate",
@@ -10,8 +10,8 @@ const DATABASE_URL = Deno.env.get("DATABASE_URL");
 
 export const exclude = [".git", "node_modules", ".fluentci", ".env"];
 
-export const validate = async (client: Client, src = ".") => {
-  if (!DATABASE_URL) {
+export const validate = async (src = ".", databaseUrl?: string) => {
+  if (!DATABASE_URL && !databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
 
@@ -26,7 +26,7 @@ export const validate = async (client: Client, src = ".") => {
     )
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withEnvVariable("DATABASE_URL", DATABASE_URL)
+    .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
     .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
     .withExec([
       "sh",
@@ -34,13 +34,13 @@ export const validate = async (client: Client, src = ".") => {
       `eval "$(devbox global shellenv)" && bun x prisma validate`,
     ]);
 
-  const result = await ctr.stdout();
+  await ctr.stdout();
 
-  console.log(result);
+  return "Schema validated";
 };
 
-export const deploy = async (client: Client, src = ".") => {
-  if (!DATABASE_URL) {
+export const deploy = async (src = ".", databaseUrl?: string) => {
+  if (!DATABASE_URL && !databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
 
@@ -63,7 +63,7 @@ export const deploy = async (client: Client, src = ".") => {
     )
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withEnvVariable("DATABASE_URL", DATABASE_URL)
+    .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
     .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
     .withExec([
       "sh",
@@ -71,13 +71,13 @@ export const deploy = async (client: Client, src = ".") => {
       `eval "$(devbox global shellenv)" && bun x prisma migrate deploy`,
     ]);
 
-  const result = await ctr.stdout();
+  await ctr.stdout();
 
-  console.log(result);
+  return "All migrations deployed";
 };
 
-export const push = async (client: Client, src = ".") => {
-  if (!DATABASE_URL) {
+export const push = async (src = ".", databaseUrl?: string) => {
+  if (!DATABASE_URL && !databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
 
@@ -100,7 +100,7 @@ export const push = async (client: Client, src = ".") => {
     )
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withEnvVariable("DATABASE_URL", DATABASE_URL)
+    .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
     .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
     .withExec([
       "sh",
@@ -108,23 +108,23 @@ export const push = async (client: Client, src = ".") => {
       `eval "$(devbox global shellenv)" && bun x prisma db push`,
     ]);
 
-  const result = await ctr.stdout();
+  await ctr.stdout();
 
-  console.log(result);
+  return "All schema changes applied";
 };
 
 export type JobExec = (
-  client: Client,
-  src?: string
+  src?: string,
+  databaseUrl?: string
 ) =>
-  | Promise<void>
+  | Promise<string>
   | ((
-      client: Client,
       src?: string,
+      databaseUrl?: string,
       options?: {
         ignore: string[];
       }
-    ) => Promise<void>);
+    ) => Promise<string>);
 
 export const runnableJobs: Record<Job, JobExec> = {
   [Job.validate]: validate,
