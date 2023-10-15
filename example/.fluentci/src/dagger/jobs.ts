@@ -1,4 +1,4 @@
-import { client } from "./dagger.ts";
+import Client, { connect } from "../../deps.ts";
 
 export enum Job {
   validate = "validate",
@@ -14,27 +14,28 @@ export const validate = async (src = ".", databaseUrl?: string) => {
   if (!DATABASE_URL && !databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
+  await connect(async (client: Client) => {
+    const context = client.host().directory(src);
+    const ctr = client
+      .pipeline(Job.validate)
+      .container()
+      .from("ghcr.io/fluent-ci-templates/bun:latest")
+      .withMountedCache(
+        "/app/node_modules",
+        client.cacheVolume("prisma_node_modules")
+      )
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
+      .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
+      .withExec([
+        "sh",
+        "-c",
+        `eval "$(devbox global shellenv)" && bun x prisma validate`,
+      ]);
 
-  const context = client.host().directory(src);
-  const ctr = client
-    .pipeline(Job.validate)
-    .container()
-    .from("ghcr.io/fluent-ci-templates/bun:latest")
-    .withMountedCache(
-      "/app/node_modules",
-      client.cacheVolume("prisma_node_modules")
-    )
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
-    .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
-    .withExec([
-      "sh",
-      "-c",
-      `eval "$(devbox global shellenv)" && bun x prisma validate`,
-    ]);
-
-  await ctr.stdout();
+    await ctr.stdout();
+  });
 
   return "Schema validated";
 };
@@ -44,34 +45,36 @@ export const deploy = async (src = ".", databaseUrl?: string) => {
     throw new Error("DATABASE_URL is not set");
   }
 
-  const mysql = client
-    .container()
-    .from("mysql")
-    .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
-    .withEnvVariable("MYSQL_DATABASE", "example")
-    .withExposedPort(3306);
+  await connect(async (client: Client) => {
+    const mysql = client
+      .container()
+      .from("mysql")
+      .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
+      .withEnvVariable("MYSQL_DATABASE", "example")
+      .withExposedPort(3306);
 
-  const context = client.host().directory(src);
-  const ctr = client
-    .pipeline(Job.deploy)
-    .container()
-    .from("ghcr.io/fluent-ci-templates/bun:latest")
-    .withServiceBinding("mysql", mysql)
-    .withMountedCache(
-      "/app/node_modules",
-      client.cacheVolume("prisma_node_modules")
-    )
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
-    .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
-    .withExec([
-      "sh",
-      "-c",
-      `eval "$(devbox global shellenv)" && bun x prisma migrate deploy`,
-    ]);
+    const context = client.host().directory(src);
+    const ctr = client
+      .pipeline(Job.deploy)
+      .container()
+      .from("ghcr.io/fluent-ci-templates/bun:latest")
+      .withServiceBinding("mysql", mysql)
+      .withMountedCache(
+        "/app/node_modules",
+        client.cacheVolume("prisma_node_modules")
+      )
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
+      .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
+      .withExec([
+        "sh",
+        "-c",
+        `eval "$(devbox global shellenv)" && bun x prisma migrate deploy`,
+      ]);
 
-  await ctr.stdout();
+    await ctr.stdout();
+  });
 
   return "All migrations deployed";
 };
@@ -81,34 +84,36 @@ export const push = async (src = ".", databaseUrl?: string) => {
     throw new Error("DATABASE_URL is not set");
   }
 
-  const mysql = client
-    .container()
-    .from("mysql")
-    .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
-    .withEnvVariable("MYSQL_DATABASE", "example")
-    .withExposedPort(3306);
+  await connect(async (client: Client) => {
+    const mysql = client
+      .container()
+      .from("mysql")
+      .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
+      .withEnvVariable("MYSQL_DATABASE", "example")
+      .withExposedPort(3306);
 
-  const context = client.host().directory(src);
-  const ctr = client
-    .pipeline(Job.push)
-    .container()
-    .from("ghcr.io/fluent-ci-templates/bun:latest")
-    .withServiceBinding("mysql", mysql)
-    .withMountedCache(
-      "/app/node_modules",
-      client.cacheVolume("prisma_node_modules")
-    )
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
-    .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
-    .withExec([
-      "sh",
-      "-c",
-      `eval "$(devbox global shellenv)" && bun x prisma db push`,
-    ]);
+    const context = client.host().directory(src);
+    const ctr = client
+      .pipeline(Job.push)
+      .container()
+      .from("ghcr.io/fluent-ci-templates/bun:latest")
+      .withServiceBinding("mysql", mysql)
+      .withMountedCache(
+        "/app/node_modules",
+        client.cacheVolume("prisma_node_modules")
+      )
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
+      .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
+      .withExec([
+        "sh",
+        "-c",
+        `eval "$(devbox global shellenv)" && bun x prisma db push`,
+      ]);
 
-  await ctr.stdout();
+    await ctr.stdout();
+  });
 
   return "All schema changes applied";
 };
