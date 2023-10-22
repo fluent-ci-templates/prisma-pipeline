@@ -1,12 +1,8 @@
-const command = new Deno.Command(Deno.execPath(), {
-  args: [
-    "run",
-    "-A",
-    "--import-map=https://deno.land/x/base_pipeline/import_map.json",
-    "https://deno.land/x/base_pipeline/src/dagger/runner.ts",
-  ],
-});
+import {
+  validate,
+  push,
+} from "https://pkg.fluentci.io/prisma_pipeline@v0.4.0/mod.ts";
 
-const { stdout } = await command.output();
-
-console.log(new TextDecoder().decode(stdout));
+// validate prisma schema and apply schema changes
+await validate();
+await push();
