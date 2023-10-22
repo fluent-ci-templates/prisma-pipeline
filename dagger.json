@@ -1,0 +1,5 @@
+{
+  "root": "",
+  "name": "prisma",
+  "sdkRuntime": "tsiry/dagger-sdk-deno"
+}
