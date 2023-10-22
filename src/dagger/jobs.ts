@@ -19,7 +19,10 @@ export const validate = async (src = ".", databaseUrl?: string) => {
     const ctr = client
       .pipeline(Job.validate)
       .container()
-      .from("ghcr.io/fluent-ci-templates/bun:latest")
+      .from("pkgxdev/pkgx:latest")
+      .withExec(["apt-get", "update"])
+      .withExec(["apt-get", "install", "-y", "ca-certificates"])
+      .withExec(["pkgx", "install", "node", "bun"])
       .withMountedCache(
         "/app/node_modules",
         client.cacheVolume("prisma_node_modules")
@@ -27,12 +30,8 @@ export const validate = async (src = ".", databaseUrl?: string) => {
       .withDirectory("/app", context, { exclude })
       .withWorkdir("/app")
       .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
-      .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
-      .withExec([
-        "sh",
-        "-c",
-        `eval "$(devbox global shellenv)" && bun x prisma validate`,
-      ]);
+      .withExec(["bun", "install"])
+      .withExec(["bunx", "prisma", "validate"]);
 
     await ctr.stdout();
   });
@@ -57,7 +56,10 @@ export const deploy = async (src = ".", databaseUrl?: string) => {
     const ctr = client
       .pipeline(Job.deploy)
       .container()
-      .from("ghcr.io/fluent-ci-templates/bun:latest")
+      .from("pkgxdev/pkgx:latest")
+      .withExec(["apt-get", "update"])
+      .withExec(["apt-get", "install", "-y", "ca-certificates"])
+      .withExec(["pkgx", "install", "node", "bun"])
       .withServiceBinding("mysql", mysql)
       .withMountedCache(
         "/app/node_modules",
@@ -66,12 +68,8 @@ export const deploy = async (src = ".", databaseUrl?: string) => {
       .withDirectory("/app", context, { exclude })
       .withWorkdir("/app")
       .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
-      .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
-      .withExec([
-        "sh",
-        "-c",
-        `eval "$(devbox global shellenv)" && bun x prisma migrate deploy`,
-      ]);
+      .withExec(["bun", "install"])
+      .withExec(["bunx", "prisma", "migrate", "deploy"]);
 
     await ctr.stdout();
   });
@@ -105,12 +103,8 @@ export const push = async (src = ".", databaseUrl?: string) => {
       .withDirectory("/app", context, { exclude })
       .withWorkdir("/app")
       .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
-      .withExec(["sh", "-c", 'eval "$(devbox global shellenv)" && bun install'])
-      .withExec([
-        "sh",
-        "-c",
-        `eval "$(devbox global shellenv)" && bun x prisma db push`,
-      ]);
+      .withExec(["bun", "install"])
+      .withExec(["bunx", "prisma", "db", "push"]);
 
     await ctr.stdout();
   });
