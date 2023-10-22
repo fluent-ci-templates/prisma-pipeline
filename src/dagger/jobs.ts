@@ -94,7 +94,10 @@ export const push = async (src = ".", databaseUrl?: string) => {
     const ctr = client
       .pipeline(Job.push)
       .container()
-      .from("ghcr.io/fluent-ci-templates/bun:latest")
+      .from("pkgxdev/pkgx:latest")
+      .withExec(["apt-get", "update"])
+      .withExec(["apt-get", "install", "-y", "ca-certificates"])
+      .withExec(["pkgx", "install", "node", "bun"])
       .withServiceBinding("mysql", mysql)
       .withMountedCache(
         "/app/node_modules",
