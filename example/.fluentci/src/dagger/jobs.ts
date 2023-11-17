@@ -50,7 +50,8 @@ export const deploy = async (src = ".", databaseUrl?: string) => {
       .from("mysql")
       .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
       .withEnvVariable("MYSQL_DATABASE", "example")
-      .withExposedPort(3306);
+      .withExposedPort(3306)
+      .asService();
 
     const context = client.host().directory(src);
     const ctr = client
@@ -88,7 +89,8 @@ export const push = async (src = ".", databaseUrl?: string) => {
       .from("mysql")
       .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
       .withEnvVariable("MYSQL_DATABASE", "example")
-      .withExposedPort(3306);
+      .withExposedPort(3306)
+      .asService();
 
     const context = client.host().directory(src);
     const ctr = client
