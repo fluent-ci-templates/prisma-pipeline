@@ -1,4 +1,6 @@
-import Client, { connect } from "../../deps.ts";
+import Client, { Directory } from "../../deps.ts";
+import { connect } from "../../sdk/connect.ts";
+import { getDirectory } from "./lib.ts";
 
 export enum Job {
   validate = "validate",
@@ -10,12 +12,15 @@ const DATABASE_URL = Deno.env.get("DATABASE_URL");
 
 export const exclude = [".git", "node_modules", ".fluentci", ".env"];
 
-export const validate = async (src = ".", databaseUrl?: string) => {
+export const validate = async (
+  src: string | Directory | undefined = ".",
+  databaseUrl?: string
+) => {
   if (!DATABASE_URL && !databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
   await connect(async (client: Client) => {
-    const context = client.host().directory(src);
+    const context = getDirectory(client, src);
     const ctr = client
       .pipeline(Job.validate)
       .container()
@@ -39,7 +44,10 @@ export const validate = async (src = ".", databaseUrl?: string) => {
   return "Schema validated";
 };
 
-export const deploy = async (src = ".", databaseUrl?: string) => {
+export const deploy = async (
+  src: string | Directory | undefined = ".",
+  databaseUrl?: string
+) => {
   if (!DATABASE_URL && !databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
@@ -53,7 +61,7 @@ export const deploy = async (src = ".", databaseUrl?: string) => {
       .withExposedPort(3306)
       .asService();
 
-    const context = client.host().directory(src);
+    const context = getDirectory(client, src);
     const ctr = client
       .pipeline(Job.deploy)
       .container()
@@ -78,7 +86,10 @@ export const deploy = async (src = ".", databaseUrl?: string) => {
   return "All migrations deployed";
 };
 
-export const push = async (src = ".", databaseUrl?: string) => {
+export const push = async (
+  src: string | Directory | undefined = ".",
+  databaseUrl?: string
+) => {
   if (!DATABASE_URL && !databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
@@ -92,7 +103,7 @@ export const push = async (src = ".", databaseUrl?: string) => {
       .withExposedPort(3306)
       .asService();
 
-    const context = client.host().directory(src);
+    const context = getDirectory(client, src);
     const ctr = client
       .pipeline(Job.push)
       .container()
