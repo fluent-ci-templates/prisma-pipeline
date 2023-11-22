@@ -51,6 +51,9 @@ schema.description = JSON.stringify({
   "deploy.src": "directory",
   "push.src": "directory",
   "validate.src": "directory",
+  "deploy.databaseUrl": "secret",
+  "push.databaseUrl": "secret",
+  "validate.databaseUrl": "secret",
 });
 
 export { schema };

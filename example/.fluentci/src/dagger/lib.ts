@@ -1,4 +1,9 @@
-import Client, { Directory, DirectoryID } from "../../deps.ts";
+import Client, {
+  Directory,
+  DirectoryID,
+  Secret,
+  SecretID,
+} from "../../deps.ts";
 
 export const getDirectory = (
   client: Client,
@@ -12,20 +17,18 @@ export const getDirectory = (
   return src instanceof Directory ? src : client.host().directory(src);
 };
 
-export const pushCommand = () => {
-  const DATABASE_URL = Deno.env.get("DATABASE_URL");
-
-  if (DATABASE_URL?.startsWith("postgres://")) {
-    return "push:pg";
+export const getDatabaseUrl = (client: Client, dbUrl?: string | Secret) => {
+  if (Deno.env.get("DATABASE_URL")) {
+    return client.setSecret("DATABASE_URL", Deno.env.get("DATABASE_URL")!);
   }
-
-  if (DATABASE_URL?.startsWith("mysql://")) {
-    return "push:mysql";
+  if (dbUrl && typeof dbUrl === "string") {
+    if (dbUrl.startsWith("core.Secret")) {
+      return client.loadSecretFromID(dbUrl as SecretID);
+    }
+    return client.setSecret("DATABASE_URL", dbUrl);
   }
-
-  if (DATABASE_URL?.startsWith("sqlite://")) {
-    return "push:sqlite";
+  if (dbUrl && dbUrl instanceof Secret) {
+    return dbUrl;
   }
-
-  throw new Error("Unsupported database");
+  return undefined;
 };

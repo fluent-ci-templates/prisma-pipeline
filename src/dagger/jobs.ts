@@ -1,6 +1,6 @@
-import Client, { Directory } from "../../deps.ts";
+import Client, { Directory, Secret } from "../../deps.ts";
 import { connect } from "../../sdk/connect.ts";
-import { getDirectory } from "./lib.ts";
+import { getDirectory, getDatabaseUrl } from "./lib.ts";
 
 export enum Job {
   validate = "validate",
@@ -8,19 +8,19 @@ export enum Job {
   push = "push",
 }
 
-const DATABASE_URL = Deno.env.get("DATABASE_URL");
-
 export const exclude = [".git", "node_modules", ".fluentci", ".env"];
 
 export const validate = async (
   src: string | Directory | undefined = ".",
-  databaseUrl?: string
+  databaseUrl?: string | Secret
 ) => {
-  if (!DATABASE_URL && !databaseUrl) {
-    throw new Error("DATABASE_URL is not set");
-  }
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
+    const secret = getDatabaseUrl(client, databaseUrl);
+    if (!secret) {
+      console.error("DATABASE_URL is not set");
+      Deno.exit(1);
+    }
     const ctr = client
       .pipeline(Job.validate)
       .container()
@@ -34,7 +34,7 @@ export const validate = async (
       )
       .withDirectory("/app", context, { exclude })
       .withWorkdir("/app")
-      .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
+      .withSecretVariable("DATABASE_URL", secret)
       .withExec(["bun", "install"])
       .withExec(["bunx", "prisma", "validate"]);
 
@@ -46,12 +46,8 @@ export const validate = async (
 
 export const deploy = async (
   src: string | Directory | undefined = ".",
-  databaseUrl?: string
+  databaseUrl?: string | Secret
 ) => {
-  if (!DATABASE_URL && !databaseUrl) {
-    throw new Error("DATABASE_URL is not set");
-  }
-
   await connect(async (client: Client) => {
     const mysql = client
       .container()
@@ -62,6 +58,13 @@ export const deploy = async (
       .asService();
 
     const context = getDirectory(client, src);
+    const secret = getDatabaseUrl(client, databaseUrl);
+
+    if (!secret) {
+      console.error("DATABASE_URL is not set");
+      Deno.exit(1);
+    }
+
     const ctr = client
       .pipeline(Job.deploy)
       .container()
@@ -76,7 +79,7 @@ export const deploy = async (
       )
       .withDirectory("/app", context, { exclude })
       .withWorkdir("/app")
-      .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
+      .withSecretVariable("DATABASE_URL", secret)
       .withExec(["bun", "install"])
       .withExec(["bunx", "prisma", "migrate", "deploy"]);
 
@@ -88,12 +91,8 @@ export const deploy = async (
 
 export const push = async (
   src: string | Directory | undefined = ".",
-  databaseUrl?: string
+  databaseUrl?: string | Secret
 ) => {
-  if (!DATABASE_URL && !databaseUrl) {
-    throw new Error("DATABASE_URL is not set");
-  }
-
   await connect(async (client: Client) => {
     const mysql = client
       .container()
@@ -104,6 +103,12 @@ export const push = async (
       .asService();
 
     const context = getDirectory(client, src);
+    const secret = getDatabaseUrl(client, databaseUrl);
+    if (!secret) {
+      console.error("DATABASE_URL is not set");
+      Deno.exit(1);
+    }
+
     const ctr = client
       .pipeline(Job.push)
       .container()
@@ -118,7 +123,7 @@ export const push = async (
       )
       .withDirectory("/app", context, { exclude })
       .withWorkdir("/app")
-      .withEnvVariable("DATABASE_URL", DATABASE_URL || databaseUrl!)
+      .withSecretVariable("DATABASE_URL", secret)
       .withExec(["bun", "install"])
       .withExec(["bunx", "prisma", "db", "push"]);
 
