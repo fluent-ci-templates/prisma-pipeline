@@ -10,10 +10,17 @@ export enum Job {
 
 export const exclude = [".git", "node_modules", ".fluentci", ".env"];
 
-export const validate = async (
-  src: string | Directory | undefined = ".",
-  databaseUrl?: string | Secret
-) => {
+/**
+ * @function
+ * @description Validate prisma schema
+ * @param {string | Directory} src
+ * @param {string | Secret} databaseUrl
+ * @returns {string}
+ */
+export async function validate(
+  src: string | Directory,
+  databaseUrl: string | Secret
+): Promise<string> {
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
     const secret = getDatabaseUrl(client, databaseUrl);
@@ -42,12 +49,19 @@ export const validate = async (
   });
 
   return "Schema validated";
-};
+}
 
-export const deploy = async (
-  src: string | Directory | undefined = ".",
-  databaseUrl?: string | Secret
-) => {
+/**
+ * @function
+ * @description Deploy all migrations
+ * @param {string | Directory} src
+ * @param {string | Secret} databaseUrl
+ * @returns {string}
+ */
+export async function deploy(
+  src: string | Directory,
+  databaseUrl: string | Secret
+): Promise<string> {
   await connect(async (client: Client) => {
     const mysql = client
       .container()
@@ -87,12 +101,19 @@ export const deploy = async (
   });
 
   return "All migrations deployed";
-};
+}
 
-export const push = async (
-  src: string | Directory | undefined = ".",
-  databaseUrl?: string | Secret
-) => {
+/**
+ * @function
+ * @description Apply schema changes
+ * @param {string | Directory} src
+ * @param {string | Secret} databaseUrl
+ * @returns {string}
+ */
+export async function push(
+  src: string | Directory,
+  databaseUrl: string | Secret
+): Promise<string> {
   await connect(async (client: Client) => {
     const mysql = client
       .container()
@@ -131,20 +152,9 @@ export const push = async (
   });
 
   return "All schema changes applied";
-};
+}
 
-export type JobExec = (
-  src?: string,
-  databaseUrl?: string
-) =>
-  | Promise<string>
-  | ((
-      src?: string,
-      databaseUrl?: string,
-      options?: {
-        ignore: string[];
-      }
-    ) => Promise<string>);
+export type JobExec = (src: string, databaseUrl: string) => Promise<string>;
 
 export const runnableJobs: Record<Job, JobExec> = {
   [Job.validate]: validate,
