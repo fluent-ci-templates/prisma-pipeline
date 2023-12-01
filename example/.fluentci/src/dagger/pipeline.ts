@@ -11,7 +11,7 @@ export default async function pipeline(src = ".", args: string[] = []) {
     await runSpecificJobs(args as jobs.Job[]);
     return;
   }
-  await deploy(src);
+  await deploy(src, Deno.env.get("DATABASE_URL")!);
 }
 
 async function runSpecificJobs(args: jobs.Job[]) {
@@ -20,6 +20,6 @@ async function runSpecificJobs(args: jobs.Job[]) {
     if (!job) {
       throw new Error(`Job ${name} not found`);
     }
-    await job();
+    await job(".", Deno.env.get("DATABASE_URL")!);
   }
 }
