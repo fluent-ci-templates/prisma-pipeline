@@ -50,10 +50,21 @@ dagger mod install github.com/fluent-ci-templates/prisma-pipeline@mod
 | deploy    | Deploy all migrations     |
 | push      | Apply schema changes      |
 
-```graphql
-deploy(databaseUrl: String!, src: String!): String
-push(databaseUrl: String!, src: String!): String
-validate(databaseUrl: String!, src: String!): String
+```typescript
+validate(
+  src: string | Directory,
+  databaseUrl: string | Secret
+): Promise<string>
+
+deploy(
+  src: string | Directory,
+  databaseUrl: string | Secret
+): Promise<string>
+
+push(
+  src: string | Directory,
+  databaseUrl: string | Secret
+): Promise<string>
 ```
 
 ## Programmatic usage
@@ -61,7 +72,7 @@ validate(databaseUrl: String!, src: String!): String
 You can also use this pipeline programmatically:
 
 ```ts
-import { deploy } from "https://pkg.fluentci.io/prisma_pipeline@v0.4.2/mod.ts";
+import { deploy } from "https://pkg.fluentci.io/prisma_pipeline@v0.6.0/mod.ts";
 
 await deploy();
 ```
@@ -69,7 +80,7 @@ await deploy();
 Or:
 
 ```ts
-import { validate, push } from "https://pkg.fluentci.io/prisma_pipeline@v0.5.0/mod.ts";
+import { validate, push } from "https://pkg.fluentci.io/prisma_pipeline@v0.6.0/mod.ts";
 
 // validate prisma schema and apply schema changes
 await validate();
