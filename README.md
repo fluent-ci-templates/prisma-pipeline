@@ -74,7 +74,7 @@ You can also use this pipeline programmatically:
 ```ts
 import { deploy } from "https://pkg.fluentci.io/prisma_pipeline@v0.6.0/mod.ts";
 
-await deploy();
+await deploy(".", Deno.env.get("DATABASE_URL")!);
 ```
 
 Or:
@@ -83,6 +83,6 @@ Or:
 import { validate, push } from "https://pkg.fluentci.io/prisma_pipeline@v0.6.0/mod.ts";
 
 // validate prisma schema and apply schema changes
-await validate();
-await push();
+await validate(".", Deno.env.get("DATABASE_URL")!);
+await push(".", Deno.env.get("DATABASE_URL")!);
 ```
