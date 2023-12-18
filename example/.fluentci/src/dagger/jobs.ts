@@ -34,7 +34,7 @@ export async function validate(
       .from("pkgxdev/pkgx:latest")
       .withExec(["apt-get", "update"])
       .withExec(["apt-get", "install", "-y", "ca-certificates"])
-      .withExec(["pkgx", "install", "node", "bun"])
+      .withExec(["pkgx", "install", "node", "bun@1.0.0"])
       .withMountedCache(
         "/app/node_modules",
         client.cacheVolume("prisma_node_modules")
