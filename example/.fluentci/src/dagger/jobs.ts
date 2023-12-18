@@ -85,7 +85,7 @@ export async function deploy(
       .from("pkgxdev/pkgx:latest")
       .withExec(["apt-get", "update"])
       .withExec(["apt-get", "install", "-y", "ca-certificates"])
-      .withExec(["pkgx", "install", "node", "bun"])
+      .withExec(["pkgx", "install", "node", "bun@1.0.0"])
       .withServiceBinding("mysql", mysql)
       .withMountedCache(
         "/app/node_modules",
@@ -136,7 +136,7 @@ export async function push(
       .from("pkgxdev/pkgx:latest")
       .withExec(["apt-get", "update"])
       .withExec(["apt-get", "install", "-y", "ca-certificates"])
-      .withExec(["pkgx", "install", "node", "bun"])
+      .withExec(["pkgx", "install", "node", "bun@1.0.0"])
       .withServiceBinding("mysql", mysql)
       .withMountedCache(
         "/app/node_modules",
