@@ -1,5 +1,4 @@
-import Client, { Directory, Secret } from "../../deps.ts";
-import { connect } from "../../sdk/connect.ts";
+import { Directory, Secret, dag } from "../../deps.ts";
 import { getDirectory, getDatabaseUrl } from "./lib.ts";
 
 export enum Job {
@@ -21,34 +20,32 @@ export async function validate(
   src: string | Directory,
   databaseUrl: string | Secret
 ): Promise<string> {
-  await connect(async (client: Client) => {
-    const context = getDirectory(client, src);
-    const secret = getDatabaseUrl(client, databaseUrl);
-    if (!secret) {
-      console.error("DATABASE_URL is not set");
-      Deno.exit(1);
-    }
-    const ctr = client
-      .pipeline(Job.validate)
-      .container()
-      .from("pkgxdev/pkgx:latest")
-      .withExec(["apt-get", "update"])
-      .withExec(["apt-get", "install", "-y", "ca-certificates"])
-      .withExec(["pkgx", "install", "node", "bun@1.0.0"])
-      .withMountedCache(
-        "/app/node_modules",
-        client.cacheVolume("prisma_node_modules")
-      )
-      .withDirectory("/app", context, { exclude })
-      .withWorkdir("/app")
-      .withSecretVariable("DATABASE_URL", secret)
-      .withExec(["bun", "install"])
-      .withExec(["bunx", "prisma", "validate"]);
+  const context = await getDirectory(dag, src);
+  const secret = await getDatabaseUrl(dag, databaseUrl);
+  if (!secret) {
+    console.error("DATABASE_URL is not set");
+    Deno.exit(1);
+  }
+  const ctr = dag
+    .pipeline(Job.validate)
+    .container()
+    .from("pkgxdev/pkgx:latest")
+    .withExec(["apt-get", "update"])
+    .withExec(["apt-get", "install", "-y", "ca-certificates"])
+    .withExec(["pkgx", "install", "node", "bun@1.0.0"])
+    .withMountedCache(
+      "/app/node_modules",
+      dag.cacheVolume("prisma_node_modules")
+    )
+    .withDirectory("/app", context, { exclude })
+    .withWorkdir("/app")
+    .withSecretVariable("DATABASE_URL", secret)
+    .withExec(["bun", "install"])
+    .withExec(["bunx", "prisma", "validate"]);
 
-    await ctr.stdout();
-  });
+  const result = await ctr.stdout();
 
-  return "Schema validated";
+  return result;
 }
 
 /**
@@ -62,45 +59,43 @@ export async function deploy(
   src: string | Directory,
   databaseUrl: string | Secret
 ): Promise<string> {
-  await connect(async (client: Client) => {
-    const mysql = client
-      .container()
-      .from("mysql")
-      .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
-      .withEnvVariable("MYSQL_DATABASE", "example")
-      .withExposedPort(3306)
-      .asService();
+  const mysql = dag
+    .container()
+    .from("mysql")
+    .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
+    .withEnvVariable("MYSQL_DATABASE", "example")
+    .withExposedPort(3306)
+    .asService();
 
-    const context = getDirectory(client, src);
-    const secret = getDatabaseUrl(client, databaseUrl);
+  const context = await getDirectory(dag, src);
+  const secret = await getDatabaseUrl(dag, databaseUrl);
 
-    if (!secret) {
-      console.error("DATABASE_URL is not set");
-      Deno.exit(1);
-    }
+  if (!secret) {
+    console.error("DATABASE_URL is not set");
+    Deno.exit(1);
+  }
 
-    const ctr = client
-      .pipeline(Job.deploy)
-      .container()
-      .from("pkgxdev/pkgx:latest")
-      .withExec(["apt-get", "update"])
-      .withExec(["apt-get", "install", "-y", "ca-certificates"])
-      .withExec(["pkgx", "install", "node", "bun@1.0.0"])
-      .withServiceBinding("mysql", mysql)
-      .withMountedCache(
-        "/app/node_modules",
-        client.cacheVolume("prisma_node_modules")
-      )
-      .withDirectory("/app", context, { exclude })
-      .withWorkdir("/app")
-      .withSecretVariable("DATABASE_URL", secret)
-      .withExec(["bun", "install"])
-      .withExec(["bunx", "prisma", "migrate", "deploy"]);
+  const ctr = dag
+    .pipeline(Job.deploy)
+    .container()
+    .from("pkgxdev/pkgx:latest")
+    .withExec(["apt-get", "update"])
+    .withExec(["apt-get", "install", "-y", "ca-certificates"])
+    .withExec(["pkgx", "install", "node", "bun@1.0.0"])
+    .withServiceBinding("mysql", mysql)
+    .withMountedCache(
+      "/app/node_modules",
+      dag.cacheVolume("prisma_node_modules")
+    )
+    .withDirectory("/app", context, { exclude })
+    .withWorkdir("/app")
+    .withSecretVariable("DATABASE_URL", secret)
+    .withExec(["bun", "install"])
+    .withExec(["bunx", "prisma", "migrate", "deploy"]);
 
-    await ctr.stdout();
-  });
+  const result = await ctr.stdout();
 
-  return "All migrations deployed";
+  return result;
 }
 
 /**
@@ -114,44 +109,42 @@ export async function push(
   src: string | Directory,
   databaseUrl: string | Secret
 ): Promise<string> {
-  await connect(async (client: Client) => {
-    const mysql = client
-      .container()
-      .from("mysql")
-      .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
-      .withEnvVariable("MYSQL_DATABASE", "example")
-      .withExposedPort(3306)
-      .asService();
+  const mysql = dag
+    .container()
+    .from("mysql")
+    .withEnvVariable("MYSQL_ROOT_PASSWORD", "pass")
+    .withEnvVariable("MYSQL_DATABASE", "example")
+    .withExposedPort(3306)
+    .asService();
 
-    const context = getDirectory(client, src);
-    const secret = getDatabaseUrl(client, databaseUrl);
-    if (!secret) {
-      console.error("DATABASE_URL is not set");
-      Deno.exit(1);
-    }
+  const context = await getDirectory(dag, src);
+  const secret = await getDatabaseUrl(dag, databaseUrl);
+  if (!secret) {
+    console.error("DATABASE_URL is not set");
+    Deno.exit(1);
+  }
 
-    const ctr = client
-      .pipeline(Job.push)
-      .container()
-      .from("pkgxdev/pkgx:latest")
-      .withExec(["apt-get", "update"])
-      .withExec(["apt-get", "install", "-y", "ca-certificates"])
-      .withExec(["pkgx", "install", "node", "bun@1.0.0"])
-      .withServiceBinding("mysql", mysql)
-      .withMountedCache(
-        "/app/node_modules",
-        client.cacheVolume("prisma_node_modules")
-      )
-      .withDirectory("/app", context, { exclude })
-      .withWorkdir("/app")
-      .withSecretVariable("DATABASE_URL", secret)
-      .withExec(["bun", "install"])
-      .withExec(["bunx", "prisma", "db", "push"]);
+  const ctr = dag
+    .pipeline(Job.push)
+    .container()
+    .from("pkgxdev/pkgx:latest")
+    .withExec(["apt-get", "update"])
+    .withExec(["apt-get", "install", "-y", "ca-certificates"])
+    .withExec(["pkgx", "install", "node", "bun@1.0.0"])
+    .withServiceBinding("mysql", mysql)
+    .withMountedCache(
+      "/app/node_modules",
+      dag.cacheVolume("prisma_node_modules")
+    )
+    .withDirectory("/app", context, { exclude })
+    .withWorkdir("/app")
+    .withSecretVariable("DATABASE_URL", secret)
+    .withExec(["bun", "install"])
+    .withExec(["bunx", "prisma", "db", "push"]);
 
-    await ctr.stdout();
-  });
+  const result = await ctr.stdout();
 
-  return "All schema changes applied";
+  return result;
 }
 
 export type JobExec = (src: string, databaseUrl: string) => Promise<string>;
