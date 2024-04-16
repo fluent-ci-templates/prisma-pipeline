@@ -21,8 +21,8 @@ jobs:
           plugin: .
           args: |
             validate
-            push
             deploy
+            push
           working-directory: example
         env:
           DATABASE_URL: mysql://root:pass@localhost:3306/example
