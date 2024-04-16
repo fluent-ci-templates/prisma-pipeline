@@ -20,8 +20,8 @@ export async function validate(
   src: string | Directory,
   databaseUrl: string | Secret
 ): Promise<string> {
-  const context = await getDirectory(dag, src);
-  const secret = await getDatabaseUrl(dag, databaseUrl);
+  const context = await getDirectory(src);
+  const secret = await getDatabaseUrl(databaseUrl);
   if (!secret) {
     console.error("DATABASE_URL is not set");
     Deno.exit(1);
@@ -67,8 +67,8 @@ export async function deploy(
     .withExposedPort(3306)
     .asService();
 
-  const context = await getDirectory(dag, src);
-  const secret = await getDatabaseUrl(dag, databaseUrl);
+  const context = await getDirectory(src);
+  const secret = await getDatabaseUrl(databaseUrl);
 
   if (!secret) {
     console.error("DATABASE_URL is not set");
@@ -117,8 +117,8 @@ export async function push(
     .withExposedPort(3306)
     .asService();
 
-  const context = await getDirectory(dag, src);
-  const secret = await getDatabaseUrl(dag, databaseUrl);
+  const context = await getDirectory(src);
+  const secret = await getDatabaseUrl(databaseUrl);
   if (!secret) {
     console.error("DATABASE_URL is not set");
     Deno.exit(1);
