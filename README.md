@@ -80,7 +80,7 @@ await deploy(".", Deno.env.get("DATABASE_URL")!);
 Or:
 
 ```ts
-import { validate, push } from "https://pkg.fluentci.io/prisma_pipeline@v0.6.1/mod.ts";
+import { validate, push } from "jsr:@fluentci/prisma";
 
 // validate prisma schema and apply schema changes
 await validate(".", Deno.env.get("DATABASE_URL")!);

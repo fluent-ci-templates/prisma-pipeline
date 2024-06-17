@@ -1,0 +1,8 @@
+[package]
+authors = [
+  "Tsiry Sandratraina <tsiry.sndr@fluentci.io>",
+]
+description = "CI/CD Plugin for Prisma"
+license = "MIT"
+name = "prisma"
+version = "0.7.0"
