@@ -72,7 +72,7 @@ push(
 You can also use this pipeline programmatically:
 
 ```ts
-import { deploy } from "https://pkg.fluentci.io/prisma_pipeline@v0.6.1/mod.ts";
+import { deploy } from "jsr:@fluentci/prisma";
 
 await deploy(".", Deno.env.get("DATABASE_URL")!);
 ```
