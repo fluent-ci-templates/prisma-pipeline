@@ -1,4 +1,4 @@
-import { Directory, Secret, dag } from "../../deps.ts";
+import { type Directory, type Secret, dag } from "../../deps.ts";
 import { getDirectory, getDatabaseUrl } from "./lib.ts";
 
 export enum Job {
