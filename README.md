@@ -1,7 +1,9 @@
 # Prisma Pipeline
 
-[![fluentci pipeline](https://img.shields.io/badge/dynamic/json?label=pkg.fluentci.io&labelColor=%23000&color=%23460cf1&url=https%3A%2F%2Fapi.fluentci.io%2Fv1%2Fpipeline%2Fprisma_pipeline&query=%24.version)](https://pkg.fluentci.io/prisma_pipeline)
-![deno compatibility](https://shield.deno.dev/deno/^1.37)
+[![fluentci pipeline](https://shield.fluentci.io/x/prisma_pipeline)](https://pkg.fluentci.io/prisma_pipeline)
+[![deno module](https://shield.deno.dev/x/prisma_pipeline)](https://deno.land/x/prisma_pipeline)
+![deno compatibility](https://shield.deno.dev/deno/^1.42)
+[![dagger-min-version](https://shield.fluentci.io/dagger/v0.11.7)](https://dagger.io)
 [![](https://img.shields.io/codecov/c/gh/fluent-ci-templates/prisma-pipeline)](https://codecov.io/gh/fluent-ci-templates/prisma-pipeline)
 
 A ready-to-use CI/CD Pipeline for managing your database migrations with [Prisma Migrate](https://www.prisma.io/docs/guides/migrate)
