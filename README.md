@@ -1,7 +1,6 @@
 # Prisma Pipeline
 
 [![fluentci pipeline](https://shield.fluentci.io/x/prisma_pipeline)](https://pkg.fluentci.io/prisma_pipeline)
-[![deno module](https://shield.deno.dev/x/prisma_pipeline)](https://deno.land/x/prisma_pipeline)
 ![deno compatibility](https://shield.deno.dev/deno/^1.42)
 [![dagger-min-version](https://shield.fluentci.io/dagger/v0.11.7)](https://dagger.io)
 [![](https://img.shields.io/codecov/c/gh/fluent-ci-templates/prisma-pipeline)](https://codecov.io/gh/fluent-ci-templates/prisma-pipeline)
